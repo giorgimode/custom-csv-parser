@@ -36,6 +36,8 @@ public class Sort {
     static Map<String, List<Float>> singleColumnValues = new HashMap<String, List<Float>>();
     static Map<String, List<Float>> singleLabelValues = new HashMap<String, List<Float>>();
 
+    static Map<String, List<List<Float>>> singleColumnValues2 = new HashMap<String, List<List<Float>>>();
+
     public static void main(String[] args) {
         try {
             //csv file containing data
@@ -48,28 +50,66 @@ public class Sort {
             nextLine = reader.readNext(); //headers
             int labelIndex;
             labelIndex = nextLine.length - 1;
-           // for (String s : nextLine) {
-                for (int i=0; i<labelIndex; i++)
-                {
-                while ((nextLine = reader.readNext()) != null) {
-                    lineNumber++;
+            // for (String s : nextLine) {
+
+            while ((nextLine = reader.readNext()) != null) {
+                for (String s : nextLine)
+                    System.out.print(s + " ");
+
+                lineNumber++;
+                for (int i = 0; i < labelIndex; i++) {
+                    if (!isNumeric(nextLine[i]))
+                        continue;
+
                     System.out.println("Line # " + lineNumber);
 
                     // nextLine[] is an array of values from the line
-                    System.out.println(nextLine[1] + "...");
 
-                    if (singleColumnValues.get(nextLine[labelIndex]) == null) {
-                        singleColumnValues.put(nextLine[labelIndex], new ArrayList<Float>());
+                    if (singleColumnValues2.get(nextLine[labelIndex]) == null) {
+                        singleColumnValues2.put(nextLine[labelIndex], new ArrayList<List<Float>>());
                     }
-                    singleColumnValues.get(nextLine[labelIndex]).add(Float.parseFloat(nextLine[1]));
+                    if (singleColumnValues2.get(nextLine[labelIndex]).size() < i + 1) {
+                        singleColumnValues2.get(nextLine[labelIndex]).add(new ArrayList<Float>());
+                    }
+
+                    singleColumnValues2.get(nextLine[labelIndex]).get(i).add(Float.parseFloat(nextLine[i]));
 
                 }
-                System.out.println(singleColumnValues + ": map");
-                createMedians(singleColumnValues);
+                // System.out.println(singleColumnValues2 + ": map");
             }
-            }catch(IOException e){
-                e.printStackTrace();
+            System.out.println(singleColumnValues2);
+            createMedians2(singleColumnValues2);
+            System.out.println("median: " + singleLabelValues);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void createMedians2(Map<String, List<List<Float>>> m) {
+
+        for (Map.Entry entrySet : m.entrySet()) {
+            List<List<Float>> columns = (List) entrySet.getValue();
+
+            for (List<Float> values : columns) {
+                Float median = null;
+                Collections.sort(values);
+
+                if (values.size() % 2 == 1)
+                    median = values.get((values.size() + 1) / 2 - 1);
+                else {
+                    Float lower = values.get(values.size() / 2 - 1);
+                    Float upper = values.get(values.size() / 2);
+                    median = (lower + upper) / 2.0f;
+                }
+                if (singleLabelValues.get(entrySet.getKey()) == null)
+                    singleLabelValues.put((String) entrySet.getKey(), new ArrayList<Float>());
+
+                singleLabelValues.get(entrySet.getKey()).add(median);
             }
+
+        }
 
     }
 
@@ -88,13 +128,22 @@ public class Sort {
                 Float upper = values.get(values.size() / 2);
                 median = (lower + upper) / 2.0f;
             }
-        if(singleLabelValues.get(entrySet.getKey())==null)
-            singleLabelValues.put((String)entrySet.getKey(), new ArrayList<Float>());
+            if (singleLabelValues.get(entrySet.getKey()) == null)
+                singleLabelValues.put((String) entrySet.getKey(), new ArrayList<Float>());
 
             singleLabelValues.get(entrySet.getKey()).add(median);
         }
         System.out.println(singleLabelValues + ": median");
 
+    }
+
+    public static boolean isNumeric(String str) {
+        try {
+            Float d = Float.parseFloat(str);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 
     private static String getField(String line) {
