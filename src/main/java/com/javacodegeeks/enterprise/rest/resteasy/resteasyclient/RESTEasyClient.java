@@ -9,6 +9,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.javacodegeeks.enterprise.rest.resteasy.Student;
 
+import java.util.ArrayList;
+
 public class RESTEasyClient {
 
 	public static void main(String[] args) {
@@ -24,7 +26,6 @@ public class RESTEasyClient {
 		
 		try {
 			ResteasyClient client = new ResteasyClientBuilder().build();
-
 			ResteasyWebTarget target = client
 					.target("http://localhost:8080/myrest/rest/jsonServices/send");
 
