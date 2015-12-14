@@ -7,36 +7,11 @@ import java.io.IOException;
 import java.util.*;
 
 public class Sort {
-    /*  public static void main(String[] args) throws Exception {
-          BufferedReader reader = new BufferedReader(new FileReader("iris.csv"));
-          Map<String, List<String>> map = new TreeMap<String, List<String>>();
-          String line = reader.readLine();  //read header
-          while ((line = reader.readLine()) != null) {
-              String key = getField(line);
-              List<String> l = map.get(key);
-              if (l == null) {
-                  l = new LinkedList<String>();
-                  map.put(key, l);
-              }
-              l.add(line);
+    static Map<String, List<String>> singleLabelValues = new HashMap<String, List<String>>();
 
-          }
-          reader.close();
-          FileWriter writer = new FileWriter("sorted_numbers.txt");
-          writer.write("a1, a2, a3, a4, id, label \n");
-          for (List<String> list : map.values()) {
-              for (String val : list) {
-                  writer.write(val);
-                  writer.write("\n");
-              }
-          }
-          writer.close();
-      }
-  */
-    static Map<String, List<Float>> singleColumnValues = new HashMap<String, List<Float>>();
-    static Map<String, List<Float>> singleLabelValues = new HashMap<String, List<Float>>();
-
-    static Map<String, List<List<Float>>> singleColumnValues2 = new HashMap<String, List<List<Float>>>();
+    static Map<String, List<List<String>>> singleColumnValues = new HashMap<String, List<List<String>>>();
+static String[] headers;
+static List<Integer> nonNumericIndices=new ArrayList<Integer>();
 
     public static void main(String[] args) {
         try {
@@ -48,92 +23,77 @@ public class Sort {
             CSVReader reader = new CSVReader(new FileReader(strFile), ';');
 
             nextLine = reader.readNext(); //headers
+            headers = nextLine;
             int labelIndex;
             labelIndex = nextLine.length - 1;
-            // for (String s : nextLine) {
-
             while ((nextLine = reader.readNext()) != null) {
+                System.out.println("Line # " + lineNumber);
+
                 for (String s : nextLine)
                     System.out.print(s + " ");
+                System.out.println("\n");
 
                 lineNumber++;
                 for (int i = 0; i < labelIndex; i++) {
                     if (!isNumeric(nextLine[i]))
-                        continue;
+                        nonNumericIndices.add(i);
 
-                    System.out.println("Line # " + lineNumber);
+
 
                     // nextLine[] is an array of values from the line
 
-                    if (singleColumnValues2.get(nextLine[labelIndex]) == null) {
-                        singleColumnValues2.put(nextLine[labelIndex], new ArrayList<List<Float>>());
+                    if (singleColumnValues.get(nextLine[labelIndex]) == null) {
+                        singleColumnValues.put(nextLine[labelIndex], new ArrayList<List<String>>());
                     }
-                    if (singleColumnValues2.get(nextLine[labelIndex]).size() < i + 1) {
-                        singleColumnValues2.get(nextLine[labelIndex]).add(new ArrayList<Float>());
+                    if (singleColumnValues.get(nextLine[labelIndex]).size() < i + 1) {
+                        singleColumnValues.get(nextLine[labelIndex]).add(new ArrayList<String>());
                     }
 
-                    singleColumnValues2.get(nextLine[labelIndex]).get(i).add(Float.parseFloat(nextLine[i]));
+                    singleColumnValues.get(nextLine[labelIndex]).get(i).add(nextLine[i]);
 
                 }
-                // System.out.println(singleColumnValues2 + ": map");
             }
-            System.out.println(singleColumnValues2);
-            createMedians2(singleColumnValues2);
+           // System.out.println(nonNumericIndices);
+            System.out.println(singleColumnValues);
+            createMedians(singleColumnValues);
             System.out.println("median: " + singleLabelValues);
-
+            createCSV();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    private static void createMedians2(Map<String, List<List<Float>>> m) {
+    private static void createMedians(Map<String, List<List<String>>> m) {
 
         for (Map.Entry entrySet : m.entrySet()) {
-            List<List<Float>> columns = (List) entrySet.getValue();
+            List<List<String>> columns = (List) entrySet.getValue();
 
-            for (List<Float> values : columns) {
-                Float median = null;
-                Collections.sort(values);
+          //  for (List<String> values : columns) {
+                for (int i = 0; i < columns.size(); i++){
+                    if (!nonNumericIndices.contains(i)) {
+                        Float median = null;
+                        Collections.sort(columns.get(i));
 
-                if (values.size() % 2 == 1)
-                    median = values.get((values.size() + 1) / 2 - 1);
-                else {
-                    Float lower = values.get(values.size() / 2 - 1);
-                    Float upper = values.get(values.size() / 2);
-                    median = (lower + upper) / 2.0f;
-                }
-                if (singleLabelValues.get(entrySet.getKey()) == null)
-                    singleLabelValues.put((String) entrySet.getKey(), new ArrayList<Float>());
+                        if (columns.get(i).size() % 2 == 1)
+                            median = Float.parseFloat(columns.get(i).get((columns.get(i).size() + 1) / 2 - 1));
+                        else {
+                            Float lower =Float.parseFloat(columns.get(i).get(columns.get(i).size() / 2 - 1));
+                            Float upper = Float.parseFloat(columns.get(i).get(columns.get(i).size() / 2));
+                            median = (lower + upper) / 2.0f;
+                        }
+                        if (singleLabelValues.get(entrySet.getKey()) == null)
+                            singleLabelValues.put((String) entrySet.getKey(), new ArrayList<String>());
 
-                singleLabelValues.get(entrySet.getKey()).add(median);
+                        singleLabelValues.get(entrySet.getKey()).add(Float.toString(median));
+                    }
+                    else {
+
+
+                    }
+
             }
-
         }
-
-    }
-
-    private static void createMedians(Map<String, List<Float>> m) {
-
-        for (Map.Entry entrySet : m.entrySet()) {
-            List<Float> values = (List) entrySet.getValue();
-
-            Float median = null;
-            Collections.sort(values);
-
-            if (values.size() % 2 == 1)
-                median = values.get((values.size() + 1) / 2 - 1);
-            else {
-                Float lower = values.get(values.size() / 2 - 1);
-                Float upper = values.get(values.size() / 2);
-                median = (lower + upper) / 2.0f;
-            }
-            if (singleLabelValues.get(entrySet.getKey()) == null)
-                singleLabelValues.put((String) entrySet.getKey(), new ArrayList<Float>());
-
-            singleLabelValues.get(entrySet.getKey()).add(median);
-        }
-        System.out.println(singleLabelValues + ": median");
 
     }
 
@@ -146,8 +106,20 @@ public class Sort {
         return true;
     }
 
-    private static String getField(String line) {
-        System.out.println(line.split(",").length);
-        return line.split(";")[5];// extract value you want to sort on
-    }
+private static void createCSV(){
+    System.out.println(headers.length + "zaza");
+   /* try {
+        FileWriter writer = new FileWriter("");
+
+
+
+        writer.flush();
+        writer.close();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }*/
+
+
+}
+
 }
