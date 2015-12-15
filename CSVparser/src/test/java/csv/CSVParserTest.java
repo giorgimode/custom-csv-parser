@@ -24,7 +24,7 @@ public class CSVParserTest {
                 "5.7;2.8;4.1;1.3;\"id_99\";\"Iris-versicolor\"\n" +
                 "6.3;3.3;6.0;2.5;\"id_101\";\"Iris-virginica\"\n" +
                 "5.8;2.7;5.1;1.9;\"id_102\";\"Iris-virginica\"\n";
-        csvParser.parser(myString);
+        csvParser.parser(myString, "myfile");
 
         BufferedReader reader =  new BufferedReader(new FileReader("outputz.csv"));
         assertNotNull(reader.readLine());

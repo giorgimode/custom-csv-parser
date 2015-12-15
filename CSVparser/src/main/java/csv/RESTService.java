@@ -4,13 +4,14 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 @Path("/send")
-public class RESTEasyService {
+public class RESTService {
 
 	@POST
+	@Path("{filename}")
 	@Consumes("text/csv")
-	public Response consumeJSON(String student) {
+	public Response consumeJSON(@PathParam("filename") String filename, String csvContent) {
 		
-	CSVParser.parser(student);
+	CSVParser.parser(filename, csvContent);
 
 		return Response.status(200).entity("OK").build();
 	}

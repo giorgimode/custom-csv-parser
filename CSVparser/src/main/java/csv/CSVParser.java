@@ -17,7 +17,7 @@ public class CSVParser {
     private static List<Integer> nonNumericIndices;
     private static String[] headers;
 
-    public static void parser(String csvString) {
+    public static void parser(String filename, String csvString) {
         nonNumericIndices = new ArrayList<Integer>();
         singleColumnValues = new HashMap<String, List<List<String>>>();
         try {
@@ -51,7 +51,7 @@ public class CSVParser {
                 }
             }
             getModeOrMedian(singleColumnValues);
-            createCSV();
+            createCSV(filename);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -119,9 +119,9 @@ public class CSVParser {
         return true;
     }
 
-    private static void createCSV() {
+    private static void createCSV(String filename) {
         try {
-            FileWriter writer = new FileWriter("outputz.csv", false);
+            FileWriter writer = new FileWriter(filename, false);
             for (int i = 0; i < headers.length; i++) {
                 writer.append("\"").append(headers[i]).append("\"");
                 if (!headers[i].equals(headers[headers.length - 1]))
