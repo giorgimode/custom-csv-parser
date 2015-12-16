@@ -22,23 +22,33 @@ public class CSVParser {
         singleColumnValues = new HashMap<String, List<List<String>>>();
         try {
             String[] nextLine;
-            int lineNumber = 0;
 
+            // parse string content via CSVReader
+            /*
+            here symbol ';' is used to split values as in sample csv files.
+            In many csv files ',' is used to split values, but this app does not cover that scenario
+            */
             CSVReader reader = new CSVReader(new StringReader(csvString), ';');
 
-            nextLine = reader.readNext(); //headers
+            // get the first row: list of headers and store it
+            nextLine = reader.readNext();
             headers = nextLine;
             int labelIndex;
+            // column index where label names are listed, usually last column
             labelIndex = nextLine.length - 1;
+
+            // read content line by line
             while ((nextLine = reader.readNext()) != null) {
-                lineNumber++;
+
+                //read column by column
                 for (int i = 0; i < labelIndex; i++) {
+                    // keep the indexes of non numeric Columns
                     if (!isNumeric(nextLine[i]))
                         nonNumericIndices.add(i);
 
 
                     // nextLine[] is an array of values from a single row
-
+                    //in singleColumnValues for each key (label) store the columns as lists
                     if (singleColumnValues.get(nextLine[labelIndex]) == null) {
                         singleColumnValues.put(nextLine[labelIndex], new ArrayList<List<String>>());
                     }
@@ -46,11 +56,14 @@ public class CSVParser {
                         singleColumnValues.get(nextLine[labelIndex]).add(new ArrayList<String>());
                     }
 
+                    // update the column for this label with new value
                     singleColumnValues.get(nextLine[labelIndex]).get(i).add(nextLine[i]);
 
                 }
             }
+            // calculate values
             getModeOrMedian(singleColumnValues);
+            //generate output
             createCSV(filename);
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,10 +73,13 @@ public class CSVParser {
 
 
     private static void getModeOrMedian(Map<String, List<List<String>>> m) {
+       // TreeMap sorts the rows by key (label)
         singleRowValues = new TreeMap<String, List<String>>();
         for (Map.Entry entrySet : m.entrySet()) {
             List<List<String>> columns = (List) entrySet.getValue();
 
+            //if column is of numeric type, find median
+            // if columns is of non-numeric type, find mode
             for (int i = 0; i < columns.size(); i++) {
                 if (!nonNumericIndices.contains(i)) {
                     Float median = null;
@@ -79,18 +95,22 @@ public class CSVParser {
                     if (singleRowValues.get(entrySet.getKey()) == null)
                         singleRowValues.put((String) entrySet.getKey(), new ArrayList<String>());
 
+                    // in singleRowValues for each key (label) there is one value/median per column
                     singleRowValues.get(entrySet.getKey()).add(Float.toString(median));
                 } else {
+                    // find mode for non-numeric values
                     HashMap<String, Integer> freqs = new HashMap<String, Integer>();
 
                     for (String val : columns.get(i)) {
                         Integer freq = freqs.get(val);
+                        //main logic, increase frequency to count occurrence
                         freqs.put(val, (freq == null ? 1 : freq + 1));
                     }
 
                     String mode = null;
                     int maxFreq = 0;
 
+                    // compare occurrences and find mode
                     for (Map.Entry<String, Integer> entry : freqs.entrySet()) {
                         int freq = entry.getValue();
                         if (freq > maxFreq) {
@@ -110,6 +130,7 @@ public class CSVParser {
 
     }
 
+    // check if string value is of numeric type
     private static boolean isNumeric(String str) {
         try {
             Float.parseFloat(str);
@@ -119,11 +140,14 @@ public class CSVParser {
         return true;
     }
 
+    // creating customized output to maintain CSV format
     private static void createCSV(String filename) {
         try {
             FileWriter writer = new FileWriter(filename, false);
+           // creating first line of headers
             for (int i = 0; i < headers.length; i++) {
                 writer.append("\"").append(headers[i]).append("\"");
+                //for the last column, there is no ';' symbol
                 if (!headers[i].equals(headers[headers.length - 1]))
                     writer.append(';');
 
@@ -136,6 +160,7 @@ public class CSVParser {
                         writer.append(entry.getValue().get(i)).append(";");
 
                     } else {
+                        // non-numeric values are enclosed in quotes
                         writer.append("\"").append(entry.getValue().get(i)).append("\"").append(";");
                     }
 

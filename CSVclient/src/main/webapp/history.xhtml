@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+</h:head>
+<h:body>
+
+<h:form>
+    <p:dataTable value="#{fileUploadView.queries}" var="query" tableStyle="width:auto">
+        <p:column headerText="Timestamp">
+            <h:outputText value="#{query.key}" />
+        </p:column>
+        <p:column headerText="Filename">
+            <h:outputText value="#{query.value}" />
+        </p:column>
+    </p:dataTable>
+
+    <br/>
+    <br/>
+    <p:commandButton value="Go back" action="/index.xhtml?faces-redirect=true" ajax="false"/>
+
+</h:form>
+</h:body>
+</html>

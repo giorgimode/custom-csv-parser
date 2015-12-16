@@ -9,7 +9,7 @@ public class RESTService {
 	@POST
 	@Path("{filename}")
 	@Consumes("text/csv")
-	public Response consumeJSON(@PathParam("filename") String filename, String csvContent) {
+	public Response consumeCSV(@PathParam("filename") String filename, String csvContent) {
 		
 	CSVParser.parser(filename, csvContent);
 
